@@ -1,0 +1,53 @@
+{
+  "kind": "collectionType",
+  "collectionName": "artworks",
+  "info": {
+    "singularName": "artwork",
+    "pluralName": "artworks",
+    "displayName": "Artwork"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title_fr": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title_fr",
+      "required": true,
+      "unique": true
+    },
+    "title_en": {
+      "type": "string"
+    },
+    "year": {
+      "type": "integer"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["drawing", "painting"],
+      "required": true
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": ["images"]
+    },
+    "visibility": {
+      "type": "enumeration",
+      "enum": ["public", "private"],
+      "required": true,
+      "default": "public"
+    },
+    "description_fr": {
+      "type": "richtext"
+    },
+    "description_en": {
+      "type": "richtext"
+    }
+  }
+}
