@@ -1,9 +1,9 @@
-import router from "./routes/artwork";
-import controller from "./controllers/artwork";
-import service from "./services/artwork";
+import routes from "./routes/artwork";
+import controllers from "./controllers/artwork";
+import services from "./services/artwork";
 
 export default {
-  router,
-  controller,
-  service,
+  routes,
+  controllers,
+  services,
 };
