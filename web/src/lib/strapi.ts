@@ -32,24 +32,47 @@ function mustStrapiUrl() {
   return STRAPI_URL;
 }
 
+export async function fetchPublicArtworks(): Promise<Artwork[]> {
+  const siteUrl = process.env.SITE_URL;
+  if (!siteUrl) {
+    console.error("Missing SITE_URL");
+    return [];
+  }
 
+  let res: Response;
 
-export async function fetchPublicArtworks() {
-    const siteUrl = process.env.SITE_URL;
-      if (!siteUrl) throw new Error("Missing SITE_URL in web/.env.local");
+  try {
+    res = await fetch(`${siteUrl}/api/public-artworks`, {
+      cache: "no-store",
+    });
+  } catch (e) {
+    console.error("Fetch failed (network)", e);
+    return [];
+  }
 
-        const res = await fetch(`${siteUrl}/api/public-artworks`, {
-            cache: "no-store",
-              });
+  const contentType = res.headers.get("content-type") || "";
 
-                if (!res.ok) throw new Error(`Proxy error ${res.status}`);
-                  const json = await res.json();
-                    return json.data as Artwork[];
-                    }
+  if (!res.ok) {
+    console.error("Proxy error", res.status);
+    return [];
+  }
 
+  // ⛔ NE JAMAIS parser si ce n’est pas du JSON
+  if (!contentType.includes("application/json")) {
+    const text = await res.text();
+    console.error("Expected JSON, got:", contentType);
+    console.error("First chars:", text.slice(0, 200));
+    return [];
+  }
 
-
-
+  try {
+    const json = await res.json();
+    return Array.isArray(json.data) ? json.data : [];
+  } catch (e) {
+    console.error("JSON parse failed", e);
+    return [];
+  }
+}
 
 
 export async function fetchPublicArtworkBySlug(slug: string) {
