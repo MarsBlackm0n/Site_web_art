@@ -4,7 +4,7 @@ export type Artwork = {
   id: number;
   documentId?: string;
   title_fr: string;
-  title_en?: string | null;
+  title_en: string;
   slug: string;
   year?: number | null;
   type: "drawing" | "painting";
@@ -48,22 +48,28 @@ export async function fetchPublicArtworks(): Promise<Artwork[]> {
   }
 }
 
+export async function fetchPublicArtworkBySlug(slug: string): Promise<Artwork | null> {
+  const base = process.env.STRAPI_INTERNAL_URL || process.env.STRAPI_URL;
+  if (!base) return null;
 
+  const u = new URL("/api/artworks", base);
+  u.searchParams.set("filters[visibility][$eq]", "public");
+  u.searchParams.set("filters[slug][$eq]", slug);
+  u.searchParams.set("populate", "image");
 
-export async function fetchPublicArtworkBySlug(slug: string) {
-  const base = mustStrapiUrl();
-  const url =
-    `${base}/api/artworks` +
-    `?filters[slug][$eq]=${encodeURIComponent(slug)}` +
-    `&filters[visibility][$eq]=public` +
-    `&populate=image`;
+  const res = await fetch(u.toString(), {
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
 
-  const res = await fetch(url, { next: { revalidate: 60 } });
-  if (!res.ok) throw new Error(`Strapi error ${res.status} on /api/artworks?slug=${slug}`);
+  const ct = res.headers.get("content-type") || "";
+  if (!res.ok || !ct.includes("application/json")) return null;
+
   const json = await res.json();
-  const arr = json.data as Artwork[];
-  return arr[0] ?? null;
+  const data = Array.isArray(json.data) ? (json.data as Artwork[]) : [];
+  return data[0] ?? null;
 }
+
 
 export function strapiMediaUrl(path?: string | null) {
   const base = process.env.STRAPI_URL;
