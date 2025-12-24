@@ -3,6 +3,18 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { fetchPublicArtworks, strapiMediaUrl, type Artwork } from "@/lib/strapi";
 
+export const metadata: Metadata = {
+  title: "Œuvres — ProcessOverResult",
+  description: "Galerie d’œuvres (dessins et peintures).",
+  alternates: {
+    canonical: "/fr/oeuvres",
+    languages: {
+      fr: "/fr/oeuvres",
+      en: "/en/artworks",
+    },
+  },
+};
+
 export default async function OeuvresPage() {
   let artworks: Artwork[] = [];
 
@@ -21,26 +33,28 @@ export default async function OeuvresPage() {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {artworks.map((art) => {
-            const attrs = art.attributes;
-            const imageUrl = strapiMediaUrl(attrs.image?.data?.attributes.url);
+            const imageUrl = strapiMediaUrl(
+              art.image?.formats?.medium?.url ?? art.image?.url
+            );
 
             return (
-              <Link key={art.id} href={`/fr/oeuvres/${attrs.slug}`} className="group">
+              <Link key={art.id} href={`/fr/oeuvres/${art.slug}`} className="group">
                 <article>
                   <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-black/5">
                     {imageUrl && (
                       <Image
                         src={imageUrl}
-                        alt={attrs.title_fr}
+                        alt={art.title_fr}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     )}
                   </div>
 
-                  <h2 className="mt-2 text-sm font-medium">{attrs.title_fr}</h2>
+                  <h2 className="mt-2 text-sm font-medium">{art.title_fr}</h2>
+
                   <p className="text-xs opacity-60">
-                    {attrs.year ?? "—"} · {attrs.type === "drawing" ? "Dessin" : "Peinture"}
+                    {art.year ?? "—"} · {art.type === "drawing" ? "Dessin" : "Peinture"}
                   </p>
                 </article>
               </Link>

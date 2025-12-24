@@ -14,7 +14,6 @@ export async function GET(req: Request) {
   u.searchParams.set("populate", "image");
 
   const url = u.toString();
-  console.log("Proxying to:", url);
 
   // Minimal headers: Accept + Cookie (codespaces auth)
   const headers = new Headers();

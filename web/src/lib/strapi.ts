@@ -2,28 +2,27 @@ import { headers } from "next/headers";
 
 export type Artwork = {
   id: number;
-  attributes: {
-    title_fr: string;
-    title_en?: string | null;
-    slug: string;
-    year?: number | null;
-    type: "drawing" | "painting";
-    visibility: "public" | "private";
-    description_fr?: string | null;
-    description_en?: string | null;
-    image?: {
-      data?: {
-        attributes: {
-          url: string;
-          alternativeText?: string | null;
-        };
-      } | null;
-    } | null;
-    createdAt: string;
-    updatedAt: string;
-    publishedAt?: string | null;
-  };
+  documentId?: string;
+  title_fr: string;
+  title_en?: string | null;
+  slug: string;
+  year?: number | null;
+  type: "drawing" | "painting";
+  visibility: "public" | "private";
+  description_fr?: string | null;
+  description_en?: string | null;
+  image?: {
+    url: string;
+    alternativeText?: string | null;
+    formats?: {
+      small?: { url: string };
+      medium?: { url: string };
+      large?: { url: string };
+      thumbnail?: { url: string };
+    };
+  } | null;
 };
+
 
 const STRAPI_URL = process.env.STRAPI_URL;
 
@@ -33,46 +32,22 @@ function mustStrapiUrl() {
 }
 
 export async function fetchPublicArtworks(): Promise<Artwork[]> {
-  const siteUrl = process.env.SITE_URL;
-  if (!siteUrl) {
-    console.error("Missing SITE_URL");
-    return [];
-  }
-
-  let res: Response;
-
   try {
-    res = await fetch(`${siteUrl}/api/public-artworks`, {
+    const res = await fetch("http://127.0.0.1:3000/api/public-artworks", {
       cache: "no-store",
     });
-  } catch (e) {
-    console.error("Fetch failed (network)", e);
-    return [];
-  }
 
-  const contentType = res.headers.get("content-type") || "";
+    const contentType = res.headers.get("content-type") || "";
+    if (!res.ok || !contentType.includes("application/json")) return [];
 
-  if (!res.ok) {
-    console.error("Proxy error", res.status);
-    return [];
-  }
-
-  // ⛔ NE JAMAIS parser si ce n’est pas du JSON
-  if (!contentType.includes("application/json")) {
-    const text = await res.text();
-    console.error("Expected JSON, got:", contentType);
-    console.error("First chars:", text.slice(0, 200));
-    return [];
-  }
-
-  try {
     const json = await res.json();
-    return Array.isArray(json.data) ? json.data : [];
+    return Array.isArray(json.data) ? (json.data as Artwork[]) : [];
   } catch (e) {
-    console.error("JSON parse failed", e);
+    console.error("fetchPublicArtworks failed", e);
     return [];
   }
 }
+
 
 
 export async function fetchPublicArtworkBySlug(slug: string) {
@@ -91,7 +66,10 @@ export async function fetchPublicArtworkBySlug(slug: string) {
 }
 
 export function strapiMediaUrl(path?: string | null) {
+  const base = process.env.STRAPI_URL;
   if (!path) return null;
   if (path.startsWith("http")) return path;
-  return `${mustStrapiUrl()}${path}`;
+  if (!base) throw new Error("Missing STRAPI_URL in web/.env.local");
+  return `${base}${path}`;
 }
+
