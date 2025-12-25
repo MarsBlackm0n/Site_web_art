@@ -33,9 +33,10 @@ function mustStrapiUrl() {
 
 export async function fetchPublicArtworks(): Promise<Artwork[]> {
   try {
-    const res = await fetch("http://127.0.0.1:3000/api/public-artworks", {
-      cache: "no-store",
-    });
+    const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+    const url = base ? `${base}/api/public-artworks` : "/api/public-artworks";
+
+    const res = await fetch(url, { cache: "no-store" });
 
     const contentType = res.headers.get("content-type") || "";
     if (!res.ok || !contentType.includes("application/json")) return [];
@@ -49,7 +50,10 @@ export async function fetchPublicArtworks(): Promise<Artwork[]> {
 }
 
 export async function fetchPublicArtworkBySlug(slug: string): Promise<Artwork | null> {
-  const base = process.env.STRAPI_INTERNAL_URL || process.env.STRAPI_URL;
+  const base =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    process.env.STRAPI_INTERNAL_URL ||
+    process.env.STRAPI_URL;
   if (!base) return null;
 
   const u = new URL("/api/artworks", base);
