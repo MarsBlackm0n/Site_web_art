@@ -1,18 +1,27 @@
 import "../globals.css";
 import type { Metadata } from "next";
 import Header from "@/components/header";
+import { notFound } from "next/navigation";
 
+const LOCALES = ["fr", "en"] as const;
+type Locale = (typeof LOCALES)[number];
 
-type LocaleParams = { locale: "fr" | "en" };
+function isLocale(x: string): x is Locale {
+  return (LOCALES as readonly string[]).includes(x);
+}
 
 export function generateStaticParams() {
   return [{ locale: "fr" }, { locale: "en" }];
 }
 
-export async function generateMetadata(props: {
-  params: Promise<LocaleParams>;
+export async function generateMetadata({
+  params,
+}: {
+  params: { locale: string };
 }): Promise<Metadata> {
-  const { locale } = await props.params;
+  if (!isLocale(params.locale)) notFound();
+
+  const locale = params.locale; // maintenant "fr" | "en"
   const isFR = locale === "fr";
 
   return {
@@ -29,19 +38,23 @@ export async function generateMetadata(props: {
   };
 }
 
-export default async function LocaleLayout(props: {
+export default async function LocaleLayout({
+  children,
+  params,
+}: {
   children: React.ReactNode;
-  params: Promise<LocaleParams>;
+  params: { locale: string };
 }) {
-  const { locale } = await props.params;
+  if (!isLocale(params.locale)) notFound();
+
+  const locale = params.locale; // "fr" | "en"
 
   return (
     <html lang={locale}>
       <body>
         <Header locale={locale} />
-        {props.children}
+        {children}
       </body>
     </html>
   );
-
 }
