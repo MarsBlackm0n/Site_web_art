@@ -72,10 +72,14 @@ export async function fetchPublicArtworkBySlug(slug: string): Promise<Artwork | 
 
 
 export function strapiMediaUrl(path?: string | null) {
-  const base = process.env.STRAPI_URL;
   if (!path) return null;
   if (path.startsWith("http")) return path;
-  if (!base) throw new Error("Missing STRAPI_URL in web/.env.local");
-  return `${base}${path}`;
+
+  const base =
+  (process.env.NEXT_PUBLIC_STRAPI_URL || process.env.STRAPI_INTERNAL_URL || process.env.STRAPI_URL || "").replace(/\/$/, "");
+
+  if (!base) throw new Error("Missing STRAPI_URL (or STRAPI_INTERNAL_URL) in web/.env.local");
+
+  return `${base}${path.startsWith("/") ? "" : "/"}${path}`;
 }
 
