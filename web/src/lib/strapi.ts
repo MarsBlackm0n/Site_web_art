@@ -80,10 +80,30 @@ export function strapiMediaUrl(path?: string | null) {
   if (path.startsWith("http")) return path;
 
   const base =
-  (process.env.NEXT_PUBLIC_STRAPI_URL || process.env.STRAPI_INTERNAL_URL || process.env.STRAPI_URL || "").replace(/\/$/, "");
+    process.env.NEXT_PUBLIC_STRAPI_URL ||
+    process.env.STRAPI_INTERNAL_URL ||
+    process.env.STRAPI_URL;
 
-  if (!base) throw new Error("Missing STRAPI_URL (or STRAPI_INTERNAL_URL) in web/.env.local");
+  if (!base) throw new Error("Missing Strapi base url env var");
 
-  return `${base}${path.startsWith("/") ? "" : "/"}${path}`;
+  return `${base.replace(/\/$/, "")}${path.startsWith("/") ? "" : "/"}${path}`;
 }
 
+
+export function bestArtworkImageUrl(
+  image?: Artwork["image"] | null,
+  size: "thumb" | "small" | "medium" | "large" = "medium"
+) {
+  if (!image) return null;
+
+  const pick =
+    (size === "large" && image.formats?.large?.url) ||
+    (size === "medium" && image.formats?.medium?.url) ||
+    (size === "small" && image.formats?.small?.url) ||
+    (size === "thumb" && image.formats?.thumbnail?.url) ||
+    image.formats?.medium?.url ||
+    image.formats?.small?.url ||
+    image.url;
+
+  return strapiMediaUrl(pick ?? null);
+}

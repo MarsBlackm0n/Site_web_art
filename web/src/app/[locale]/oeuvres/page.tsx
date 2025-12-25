@@ -45,7 +45,7 @@ export default async function OeuvresPage() {
               src={imageUrl}
               alt={art.title_fr}
               fill
-              unoptimized={process.env.NODE_ENV !== "production"}
+              unoptimized
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
