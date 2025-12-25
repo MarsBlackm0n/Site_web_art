@@ -17,11 +17,11 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  if (!isLocale(params.locale)) notFound();
+  const { locale } = await params;
+  if (!isLocale(locale)) notFound();
 
-  const locale = params.locale; // maintenant "fr" | "en"
   const isFR = locale === "fr";
 
   return {
@@ -43,11 +43,10 @@ export default async function LocaleLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  if (!isLocale(params.locale)) notFound();
-
-  const locale = params.locale; // "fr" | "en"
+  const { locale } = await params;
+  if (!isLocale(locale)) notFound();
 
   return (
     <html lang={locale}>
