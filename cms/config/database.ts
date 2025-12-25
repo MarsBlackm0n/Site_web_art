@@ -1,9 +1,7 @@
-export default () => ({
+export default ({ env }) => ({
   connection: {
-    client: "sqlite",
-    connection: {
-      filename: ".tmp/data.db",
-    },
-    useNullAsDefault: true,
+    client: env("DATABASE_CLIENT", "postgres"),
+    connection: env("DATABASE_URL"),
+    ssl: env.bool("DATABASE_SSL", false),
   },
 });
