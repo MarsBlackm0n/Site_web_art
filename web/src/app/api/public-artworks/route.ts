@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
-  const base = process.env.STRAPI_INTERNAL_URL || process.env.STRAPI_URL;
+  const base = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.STRAPI_INTERNAL_URL || process.env.STRAPI_URL;
   if (!base) {
     return NextResponse.json({ error: "Missing STRAPI_URL" }, { status: 500 });
   }
